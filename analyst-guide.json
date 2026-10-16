@@ -1,0 +1,856 @@
+{
+  "name": "LOLCHAIN Analyst Guide",
+  "reviewed": "2026-10-16",
+  "scope": "Analyst procedures are LOLCHAIN guidance; campaign claims and object attribution remain tied to the catalog sources.",
+  "references": [
+    {
+      "id": "evm-rpc",
+      "title": "Ethereum JSON-RPC",
+      "publisher": "Ethereum",
+      "url": "https://ethereum.org/developers/docs/apis/json-rpc/"
+    },
+    {
+      "id": "evm-block",
+      "title": "Block-pinned reads (EIP-1898)",
+      "publisher": "Ethereum",
+      "url": "https://eips.ethereum.org/EIPS/eip-1898"
+    },
+    {
+      "id": "bitcoin-rpc",
+      "title": "Bitcoin raw transaction decoding",
+      "publisher": "Bitcoin Core",
+      "url": "https://bitcoincore.org/en/doc/28.0.0/rpc/rawtransactions/decoderawtransaction/"
+    },
+    {
+      "id": "bitcoin-history",
+      "title": "Bitcoin historical transaction lookup",
+      "publisher": "Bitcoin Core",
+      "url": "https://bitcoincore.org/en/doc/24.0.0/rpc/rawtransactions/getrawtransaction/"
+    },
+    {
+      "id": "solana-history",
+      "title": "Solana address history",
+      "publisher": "Solana",
+      "url": "https://solana.com/docs/rpc/http/getsignaturesforaddress"
+    },
+    {
+      "id": "solana-tx",
+      "title": "Solana transaction retrieval",
+      "publisher": "Solana",
+      "url": "https://solana.com/docs/rpc/http/gettransaction"
+    },
+    {
+      "id": "ipfs-address",
+      "title": "IPFS addressing",
+      "publisher": "IPFS",
+      "url": "https://docs.ipfs.tech/how-to/address-ipfs-on-web/"
+    },
+    {
+      "id": "ipfs-routing",
+      "title": "IPFS content routing",
+      "publisher": "IPFS",
+      "url": "https://docs.ipfs.tech/concepts/how-ipfs-works/"
+    },
+    {
+      "id": "ipns",
+      "title": "IPNS records",
+      "publisher": "IPFS",
+      "url": "https://docs.ipfs.tech/concepts/ipns/"
+    },
+    {
+      "id": "arweave",
+      "title": "Arweave HTTP API",
+      "publisher": "Arweave",
+      "url": "https://docs.arweave.org/developers/arweave-node-server/http-api"
+    },
+    {
+      "id": "nkn",
+      "title": "NKN client SDK",
+      "publisher": "NKN",
+      "url": "https://docs.nkn.org/nkn-sdk-js/"
+    },
+    {
+      "id": "nkn-transport",
+      "title": "NKN network architecture",
+      "publisher": "NKN",
+      "url": "https://www.nkn.org/static/doc/NewKindofNetwork_EN.pdf"
+    },
+    {
+      "id": "ton-api",
+      "title": "TON API access and historical coverage",
+      "publisher": "TON",
+      "url": "https://docs.ton.org/api/overview"
+    },
+    {
+      "id": "ton-get",
+      "title": "TON get methods",
+      "publisher": "TON",
+      "url": "https://docs.ton.org/contracts/blueprint/first-smart-contract"
+    },
+    {
+      "id": "icp",
+      "title": "ICP canister query and update calls",
+      "publisher": "Internet Computer",
+      "url": "https://docs.internetcomputer.org/concepts/canisters/"
+    },
+    {
+      "id": "icp-cert",
+      "title": "ICP response certification",
+      "publisher": "Internet Computer",
+      "url": "https://docs.internetcomputer.org/concepts/certified-data/"
+    },
+    {
+      "id": "namecoin",
+      "title": "Namecoin resolution",
+      "publisher": "Namecoin",
+      "url": "https://www.namecoin.org/docs/electrum-nmc/"
+    },
+    {
+      "id": "emercoin",
+      "title": "Emercoin name-value history",
+      "publisher": "Emercoin",
+      "url": "https://emercoin.com/documentation/blockchain-services/emernvs/"
+    },
+    {
+      "id": "nft",
+      "title": "ERC-721 metadata interface",
+      "publisher": "Ethereum",
+      "url": "https://eips.ethereum.org/EIPS/eip-721"
+    },
+    {
+      "id": "tron",
+      "title": "TRON transaction-body lookup",
+      "publisher": "TRON",
+      "url": "https://developers.tron.network/reference/gettransactionbyid"
+    },
+    {
+      "id": "aptos",
+      "title": "Aptos transaction status and lookup",
+      "publisher": "Aptos",
+      "url": "https://aptos.dev/build/guides/application-integration"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "start",
+      "title": "Start an investigation",
+      "summary": "Establish what the blockchain does in this incident before following addresses.",
+      "references": [],
+      "sections": [
+        {
+          "title": "1. Preserve the starting evidence",
+          "body": "Work from a captured request, sample, script or published object. Keep original bytes and a SHA-256 hash; do decoding on a copy.",
+          "steps": [
+            "Record case ID, UTC acquisition time, artifact path, source URL and the host/process or browser context.",
+            "Keep HTTP method, full URL, request body, response body and status when available. Separate secret API credentials from the shareable record.",
+            "For ledger objects, record chain, network, chain ID or cluster, object type and the exact address, transaction hash, signature, CID or name."
+          ]
+        },
+        {
+          "title": "2. Classify the chain\u2019s role",
+          "body": "Decide whether the object holds a payload, returns a pointer, carries commands, tracks visitors or supports transport. One infection chain can use several techniques.",
+          "steps": [
+            "Read the matching technique\u2019s playbook and evidence label. Research, implemented capability and observed campaign use have different meanings.",
+            "A returned URL is resolution; JavaScript returned in the response is payload hosting. A gateway, contract and downstream server are separate objects.",
+            "Keep case evidence separate from historical examples in this catalog. A matching provider hostname alone does not establish compromise."
+          ]
+        },
+        {
+          "title": "3. Reproduce the read",
+          "body": "Use a trusted explorer or an approved read-only provider. Preserve the request and the raw answer rather than copying only the decoded result.",
+          "steps": [
+            "Confirm the correct network. Testnet and mainnet addresses can look identical.",
+            "Use incident-time blocks or saved responses where possible; record historical-state gaps, missing pages and provider errors.",
+            "Do not execute retrieved code or visit the decoded destination while interpreting the chain data."
+          ]
+        },
+        {
+          "title": "4. Decode and correlate",
+          "body": "Write down each transformation, with input and output hashes. Then test the proposed chain-to-network relationship against endpoint evidence.",
+          "steps": [
+            "Retain offsets, byte order, ABI types, keys and their provenance. A selector database entry is a hypothesis, not a verified function definition.",
+            "Correlate the read time with browser, process, DNS, proxy and network events. Record the off-chain request that followed, if captured.",
+            "Separate a downloaded payload from execution, a staged destination from contacted infrastructure, and a command from its result."
+          ]
+        },
+        {
+          "title": "5. Report a bounded conclusion",
+          "body": "Use the reporting chapter for a consistent case record. A useful result explains both what the evidence supports and what remains unknown.",
+          "steps": [
+            "Link each assertion to a saved artifact or publication. Mark analyst inferences explicitly.",
+            "Recommend the narrowest justified network or application control and describe likely shared-service impact.",
+            "List unconfirmed branches, missing history and further evidence needed. Do not treat ledger activity as a victim count."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "essentials",
+      "title": "Chain evidence essentials",
+      "summary": "Read the object types and visibility limits before interpreting a transaction list.",
+      "references": [
+        "evm-rpc",
+        "ipns",
+        "ipfs-address"
+      ],
+      "sections": [
+        {
+          "title": "Addresses, contracts and networks",
+          "body": "An address identifies an account within a network. A contract account has code; a wallet-like account is not automatically a contract. The same address string on two EVM networks identifies two separate contexts. Record chain/network and chain ID together; testnet observations can be operationally relevant without being mainnet activity."
+        },
+        {
+          "title": "Read requests and state changes",
+          "body": "A transaction can change state and has an inclusion/status record. A getter read such as eth_call evaluates a request without creating a new transaction. The provider may observe the read, but the ledger does not list everyone who queried it. Keep transaction input, contract return data, stored state and emitted logs distinct."
+        },
+        {
+          "title": "Selectors and ABI",
+          "body": "In common EVM contract calls, the first four calldata bytes select a function; later bytes encode arguments. The ABI describes how to interpret these fields and return values. A selector match can collide or be intentionally misleading. Verify it against the actual code or the loader\u2019s use of the result."
+        },
+        {
+          "title": "Pointers, payloads and transports",
+          "body": "A URL returned by a contract is a pointer. Script or file bytes returned by the chain can be a payload. Commands/configuration are another role. A CID addresses content, while IPNS is a mutable name that resolves to content. The RPC/gateway/relay that transports a request is a separate object from the resolved server or the stored content."
+        },
+        {
+          "title": "What the evidence can establish",
+          "steps": [
+            "Published chain data establishes available bytes/state at a specific context; it does not establish that a victim read or executed them.",
+            "Host/network evidence establishes the request and subsequent behavior when captured; TLS-only metadata may not disclose the exact method or response.",
+            "A configured or staged route is a potential path. Disabled modules, research designs and unconfirmed runtime branches retain those limitations."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "evm",
+      "title": "EVM contracts and transaction data",
+      "summary": "Inspect contract getters, storage, calldata and change history on Ethereum-compatible chains.",
+      "references": [
+        "evm-rpc",
+        "evm-block"
+      ],
+      "sections": [
+        {
+          "title": "Confirm the object",
+          "body": "Identify the network from the captured provider and corroborate it with eth_chainId. Preserve the contract address, input data and incident block. Check runtime code with eth_getCode at the relevant block. An address without code at that block may still be a wallet, a pre-deployment address or a transaction recipient."
+        },
+        {
+          "title": "Choose the right read",
+          "body": "Use eth_getTransactionByHash for transaction input; eth_getTransactionReceipt for status and logs. For a getter, reproduce the captured eth_call using its original to, data and any relevant from/value fields. Only interpret storage slots when the layout is known. Contract storage is not a list of printable strings.",
+          "steps": [
+            "Match a verified ABI to the deployed code and network. Follow a proxy implementation only when evidence supports that relationship.",
+            "Keep raw ABI return bytes. Decode dynamic strings/bytes using their offsets and lengths; preserve any later hex, Base64, compression or cipher layers.",
+            "Use the exact captured selector and arguments. Do not guess a getter from its name or assume a familiar ERC-20 selector has normal token semantics."
+          ]
+        },
+        {
+          "title": "Read-only request templates",
+          "body": "Replace placeholders with values from evidence. Use an explicit block number in hexadecimal, not latest, for a reproducible historical read. These are RPC examples, not SIEM queries.",
+          "code": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"eth_chainId\",\"params\":[]}\n{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"eth_getCode\",\"params\":[\"<CONTRACT>\",\"<BLOCK_HEX>\"]}\n{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"eth_call\",\"params\":[{\"to\":\"<CONTRACT>\",\"data\":\"<CAPTURED_CALLDATA>\"},\"<BLOCK_HEX>\"]}"
+        },
+        {
+          "title": "Decode an ABI string offline \u00b7 synthetic",
+          "body": "This example creates an inert URL under the reserved .example domain, wraps it as one ABI string return and decodes it. Real evidence must use the verified return type, raw captured bytes and a pinned read. Never execute decoded text. This small decoder handles one standard dynamic string result, not arbitrary ABI tuples or packed data.",
+          "code": "raw_text = \"https://c2.example/x\".encode(\"utf-8\")\nword = lambda n: n.to_bytes(32, \"big\")\n# Synthetic single-string ABI response: offset, length, padded value.\nresponse = word(32) + word(len(raw_text)) + raw_text.ljust(32, b\"\\x00\")\n# For a real capture, use: response = bytes.fromhex(saved_result.removeprefix(\"0x\"))\nif len(response) < 64:\n    raise ValueError(\"Truncated response\")\noffset = int.from_bytes(response[:32], \"big\")\nif offset != 32 or offset + 32 > len(response):\n    raise ValueError(\"Not a single standard ABI string return\")\nlength = int.from_bytes(response[offset:offset+32], \"big\")\nstart = offset + 32\nif start + length > len(response):\n    raise ValueError(\"Truncated string\")\ndecoded = response[start:start+length].decode(\"utf-8\", errors=\"strict\")\nprint(decoded)  # inert text only",
+          "code_label": "Offline Python example \u00b7 synthetic data"
+        },
+        {
+          "title": "Reconstruct changes",
+          "body": "Compare saved or block-pinned responses around the incident. Keep block hashes as well as numbers, and note the chain\u2019s finality and provider retention. Supporting providers may accept a block-hash object under EIP-1898; support must be checked for the chain/client.",
+          "steps": [
+            "A getter call does not create a ledger transaction. Explorer transaction totals cannot count readers or infections.",
+            "Transactions and events can locate state changes, but logs alone may not expose every update. Absence of an event does not prove unchanged storage.",
+            "Archive-state errors and an empty result on the wrong network are collection gaps, not evidence that the reported contract never existed."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bitcoin",
+      "title": "Bitcoin transaction channels",
+      "summary": "Inspect OP_RETURN, output values and address bytes without confusing payment activity with malware signaling.",
+      "references": [
+        "bitcoin-rpc",
+        "bitcoin-history"
+      ],
+      "sections": [
+        {
+          "title": "Collect the exact transaction",
+          "body": "Preserve transaction ID, raw transaction, block hash/height, confirmation context and the source of any address history. Bitcoin Core historical lookup depends on available blocks and indexing; it is not a general address-history search.",
+          "code": "bitcoin-cli getrawtransaction \"<TXID>\" false \"<BLOCKHASH>\"\nbitcoin-cli decoderawtransaction \"<RAW_TRANSACTION_HEX>\""
+        },
+        {
+          "title": "Identify the field used by the sample",
+          "body": "Inspect output scripts and their pushed bytes for OP_RETURN. For amount-based signaling, retain integer satoshi values. For address-based signaling, preserve the decoded address representation and the exact bytes the malware selects.",
+          "steps": [
+            "Reproduce output ordering, transaction selection and fallback behavior from the analyzed code. Do not choose a convenient output by eye.",
+            "Apply only evidenced decoding, decryption and byte order. Keep scripts, ciphertext, decoded bytes and proposed destinations separately.",
+            "Record history pagination and reorganization/confirmation context. An address can receive irrelevant or adversarial transactions."
+          ]
+        },
+        {
+          "title": "Bound the result",
+          "body": "An encoded value becomes a malware destination only when linked to the sample\u2019s selection and decoding logic. Distinguish an attacker-controlled wallet from a public reference address. Transaction counts and coin transfers do not establish a victim total."
+        }
+      ]
+    },
+    {
+      "id": "solana",
+      "title": "Solana memo resolution",
+      "summary": "Recover the memo and selection rule that a loader uses, with cluster and commitment recorded.",
+      "references": [
+        "solana-history",
+        "solana-tx"
+      ],
+      "sections": [
+        {
+          "title": "Recover the lookup",
+          "body": "Extract the address, provider, cluster and selection rule from the loader. getSignaturesForAddress returns signatures referencing an address, newest first; use pagination to cover the incident window. A referenced account is not necessarily the signer or controller."
+        },
+        {
+          "title": "Inspect each selected transaction",
+          "body": "Retrieve the transaction with getTransaction. Preserve its slot, block time if available, commitment, execution status, account keys, signers and instruction bytes. Inspect memo instructions and inner instructions where the sample\u2019s behavior requires them.",
+          "code": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getSignaturesForAddress\",\"params\":[\"<ADDRESS>\",{\"limit\":100,\"commitment\":\"finalized\"}]}\n{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"getTransaction\",\"params\":[\"<SIGNATURE>\",{\"encoding\":\"jsonParsed\",\"commitment\":\"finalized\",\"maxSupportedTransactionVersion\":0}]}"
+        },
+        {
+          "title": "Decode and correlate",
+          "body": "Use the source program and encoding to interpret the memo. Preserve both encoded and decoded forms; do not run any returned command.",
+          "steps": [
+            "Handle unsupported transaction versions as collection limitations. Set the supported version according to the transaction/client, rather than discarding errors.",
+            "Check failed transaction status and apply the loader\u2019s actual acceptance rule. A memo in address history alone does not prove that it was selected.",
+            "Correlate the chosen memo with the next HTTP request, payload hash and execution artifacts. Configured fallback RPCs do not prove contact with every provider."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cross-chain",
+      "title": "Cross-chain routing",
+      "summary": "Follow application pointers across networks without assuming a bridge or asset transfer.",
+      "references": [
+        "tron",
+        "aptos",
+        "evm-rpc"
+      ],
+      "sections": [
+        {
+          "title": "Keep each hop independently identifiable",
+          "body": "Extract the first-chain request, the response that selects the next object, fallback conditions and any decryption inputs. Create one evidence row per chain/network/object and link the rows with the exact response bytes that establish the pointer."
+        },
+        {
+          "title": "TRON lookup",
+          "body": "Retrieve the transaction body by transaction ID on the evidenced network. The SolidityNode gettransactionbyid view returns solidified transactions; use the receipt API separately when execution status matters. Preserve raw_data and the exact field the loader reads. Do not assume HTTP 200 means a successful API result."
+        },
+        {
+          "title": "Aptos lookup",
+          "body": "Preserve the transaction-by-hash response, ledger version/time, status and the Move payload or other field selected by the loader. Distinguish pending from committed transactions. Use Aptos-native parsing rather than treating its response as Ethereum calldata."
+        },
+        {
+          "title": "Validate the next hop",
+          "steps": [
+            "Decode only the field and transformation used by the sample. A destination-chain transaction hash or pointer is a distinct artifact, not evidence that coins crossed chains.",
+            "For the BSC/EVM stage, retrieve input or getter output according to the next request. Preserve the chosen chain ID and incident block.",
+            "Record which branch ran. TRON and Aptos can be redundant alternatives; two configured routes do not establish two successful reads."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "content",
+      "title": "IPFS, IPNS and Arweave",
+      "summary": "Separate immutable content identifiers, mutable names, gateway transport and stored configuration.",
+      "references": [
+        "ipfs-address",
+        "ipfs-routing",
+        "ipns",
+        "arweave"
+      ],
+      "sections": [
+        {
+          "title": "IPFS: identify the content",
+          "body": "Extract the CID, optional path and gateway separately. Handle both /ipfs/<CID>/ paths and <CID>.ipfs.<gateway> subdomains. Preserve the original spelling and the parsed identifier; different encodings can represent the same CID.",
+          "steps": [
+            "Save bytes as inert evidence from an approved collection environment; do not render the page or execute the file.",
+            "Record content type, file hash, size, retrieval time and gateway response. A CID identifies a content structure; a downloaded file\u2019s SHA-256 is not automatically its CID.",
+            "One CID can be served by different gateways. A provider or gateway is a delivery intermediary, not automatically the uploader or attacker."
+          ]
+        },
+        {
+          "title": "IPNS: preserve the resolution",
+          "body": "Keep the mutable name, observation time and resolved /ipfs/ path together. Where tooling exposes the signed record, retain sequence, validity and signature material and note whether you verified it. Gateway resolution delegates trust to that gateway.",
+          "steps": [
+            "Compare saved resolutions over time. Today\u2019s answer does not reconstruct an incident-time target.",
+            "A failed gateway read does not prove the content is gone. Do not silently replace an IPNS name with a current CID in historical evidence."
+          ]
+        },
+        {
+          "title": "Native IPFS transport",
+          "body": "If the sample uses peers rather than HTTP gateways, collect peer identifiers, application configuration and connection telemetry. Content routing and peer messaging require application visibility; a gateway-only hostname list will miss native peer traffic."
+        },
+        {
+          "title": "Arweave: preserve selection and bytes",
+          "body": "Record the query, tags such as a Drive-Id, selected transaction or data-item identifier, gateway, and retrieval time. Preserve transaction metadata and returned data. Separate an upload record from the gateway that serves it, and apply the sample\u2019s ordering and decryption rules. A configured recovery path does not prove it ran."
+        }
+      ]
+    },
+    {
+      "id": "overlays",
+      "title": "NKN and TON transport",
+      "summary": "Distinguish blockchain-backed lookup from peer messaging that is not stored on the ledger.",
+      "references": [
+        "nkn",
+        "nkn-transport",
+        "ton-api",
+        "ton-get"
+      ],
+      "sections": [
+        {
+          "title": "NKN messages",
+          "body": "Collect sample configuration, client identifier/public-key address, seed discovery responses, relay connections and process context. Separate client send/publish activity from blockchain wallet transactions. NKN messages travel off-chain; a block explorer is not a message transcript.",
+          "steps": [
+            "Correlate send/receive events with commands, screenshots or other local artifacts. Encrypted traffic may permit timing and volume analysis without disclosing its contents.",
+            "Do not infer client ownership from a relay node. Keep other transports, such as MQTT, in a separate evidence path."
+          ]
+        },
+        {
+          "title": "TON overlay or contract?",
+          "body": "Determine whether the artifact is a .adnl destination/local proxy route or a smart-contract/API read. Preserve native addresses and identifiers exactly. A .adnl pseudo-hostname is not an ordinary DNS name.",
+          "steps": [
+            "For overlay sessions, collect proxy configuration, process/socket context, peer destinations and the local artifacts that support remote-control or upload claims.",
+            "For contract lookup, preserve account, network, get-method name, arguments, returned stack and block context. Decode cells/slices using the getter\u2019s structure.",
+            "Record archive and proof availability. A TON get method is a read; its invocation is not a new ledger transaction. Do not substitute an invented address when a report redacts it."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "services",
+      "title": "Canisters, naming and NFTs",
+      "summary": "Inspect application identifiers and mutable records without assuming that every lookup is a transaction.",
+      "references": [
+        "icp",
+        "icp-cert",
+        "namecoin",
+        "emercoin",
+        "nft"
+      ],
+      "sections": [
+        {
+          "title": "ICP canister resolution",
+          "body": "Preserve the canister principal, exact hostname, request path, method and raw response. Distinguish ordinary HTTP delivery from direct canister query/update calls. Record certification verification where relevant. An update and a query have different execution and authenticity properties; a query is not a public transaction log of readers."
+        },
+        {
+          "title": "Namecoin and Emercoin records",
+          "body": "Record the name/namespace, resolver or gateway and observed answer. Capture available record history, height/time and expiration context; compare it with DNS/proxy evidence at the incident time.",
+          "steps": [
+            "Namecoin .bit resolution can involve Namecoin-aware software or gateways. Preserve both the blockchain name and the ordinary DNS infrastructure used to reach it.",
+            "Emercoin name-value records can hold DNS-related values. Retain the full record and name_history/name_show outputs when using compatible tooling.",
+            "A current mapping does not prove a historical destination, and a gateway hostname does not prove ownership of the underlying name."
+          ]
+        },
+        {
+          "title": "NFT metadata or token state",
+          "body": "Preserve chain, contract, token ID and incident-time response/state. Follow the demonstrated command path: token fields, events or metadata URI. tokenURI belongs to the optional ERC-721 metadata extension; do not assume every NFT contract implements it.",
+          "steps": [
+            "Keep metadata content and URI resolution separate, including IPFS/HTTP retrieval. Token ownership does not by itself attribute control of all linked infrastructure.",
+            "Research demonstrations remain research unless a separate campaign source supports operational use."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "correlation",
+      "title": "Correlate chain and host evidence",
+      "summary": "Prove the transition from a blockchain read to execution, communication or data movement.",
+      "references": [],
+      "sections": [
+        {
+          "title": "Build a timeline",
+          "body": "Record UTC host-event time, acquisition time and block/slot time separately. Keep clock offset and uncertainty. Order browser/RPC requests, decoded responses, downstream connections, process starts and resulting files; do not substitute block time for the endpoint\u2019s read time."
+        },
+        {
+          "title": "Test the claimed role",
+          "steps": [
+            "Delivery: connect response bytes to the saved file or script; record the later process or browser execution separately.",
+            "C2: connect a decoded endpoint or command to a session, task or command result. A lookup can be preparatory without establishing C2.",
+            "Victim tracking: identify the actual UUID, IP or flag fields and whether they were read or written. Duplicate-visitor checks and sensitive-data exfiltration are different findings.",
+            "Exfiltration: identify data collected, the sending process, destination and transfer evidence. A skimmer that reads a contract then sends HTTP data is off-chain exfiltration.",
+            "WebRTC: link the chain-returned script/SDP to ICE negotiation, the selected peer/data channel and later payload handling. Signaling configuration alone does not prove a completed channel."
+          ]
+        },
+        {
+          "title": "Make a proportionate control recommendation",
+          "body": "Start with the specific contacted destination, resource or application behavior. Shared RPC/gateway blocking can affect legitimate workloads and does not remove the stored object.",
+          "steps": [
+            "Use the Infrastructure page to download hosts/IPs for the chosen provenance and class. Keep the CSV/JSON evidence context alongside the plain list.",
+            "Retain full URL paths, contract/selectors, canister names, CIDs and IPNS names as separate hunting observables. Host-only exports intentionally omit this precision.",
+            "Mark source-linked observations, historical indicators, configured routes and community-directory entries distinctly. A community RPC entry is a baseline candidate, not a malicious indicator."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reporting",
+      "title": "Write a reproducible finding",
+      "summary": "Use the same evidence record for every chain and technique.",
+      "references": [],
+      "sections": [
+        {
+          "title": "Minimum case record",
+          "steps": [
+            "Question and scope: case ID, analyst, technique IDs, evidence label and the exact behavior being tested.",
+            "Artifact provenance: original file/request/source, UTC collection time, SHA-256 and access/collection method.",
+            "Chain context: chain/network/ID or cluster; object type and exact value; block hash/height or slot/signature; finality/commitment.",
+            "Read: provider/explorer, method/arguments, raw response, acquisition time, historical-state coverage and any authentication redaction.",
+            "Transformation: byte range, decoder/ABI, key provenance, ordered steps and hashes of derived files.",
+            "Correlation: host/process/browser evidence and the next observed action, with timestamps and uncertainty.",
+            "Conclusion: observed facts, explicit inferences, alternatives, missing evidence and confidence.",
+            "Control: exact scope, shared-service impact, historical/configured/community qualification and validation owner."
+          ]
+        },
+        {
+          "title": "Confidence",
+          "body": "High: the selected chain object, reproducible decode and matching host/network sequence are preserved. Moderate: the decode or source evidence is strong, but one transition lacks telemetry. Low: the finding rests on a configured path, shared provider match or an untested interpretation. Confidence is an analyst assessment; it does not change the catalog\u2019s evidence label."
+        },
+        {
+          "title": "Worked example \u00b7 synthetic",
+          "body": "A captured getter read at block B returns a URL. A browser then requests that URL, but no execution artifact is available. Report contract-based resolution and observed retrieval, with execution unconfirmed. Do not report an on-chain payload, a victim count or confirmed code execution from this evidence alone. All values in this example are placeholders, not case indicators."
+        }
+      ]
+    }
+  ],
+  "playbooks": [
+    {
+      "technique": "LBC-001",
+      "methods": [
+        "evm"
+      ],
+      "collect": "Captured loader, contract, selector/arguments, chain/network and returned bytes.",
+      "inspect": "Reproduce the getter at the incident block; ABI-decode the returned string/bytes, then preserve each script decoding layer.",
+      "correlate": "Match the recovered script hash or content to browser cache, injection and subsequent network/process activity.",
+      "limits": "If only a URL is returned, classify that step as LBC-003. A reader does not appear as a ledger transaction."
+    },
+    {
+      "technique": "LBC-002",
+      "methods": [
+        "evm"
+      ],
+      "collect": "Transaction hash/history API response, input field and the loader\u2019s selection rule.",
+      "inspect": "Retrieve the selected transaction input; retain destination, status, block and exact byte offsets before decoding.",
+      "correlate": "Connect the decoded instructions or configuration to the next stage and the loader\u2019s actual history ordering.",
+      "limits": "Do not confuse calldata with getter return data. A transaction to a burn address does not establish contract execution."
+    },
+    {
+      "technique": "LBC-003",
+      "methods": [
+        "evm"
+      ],
+      "collect": "Contract getter request, relevant caller fields, resolver output and configured provider set.",
+      "inspect": "Decode the returned pointer and compare block-pinned answers; reproduce any evidenced decryption or provider-voting rule.",
+      "correlate": "Find the downstream connection in endpoint telemetry and distinguish it from the RPC request.",
+      "limits": "A public provider is not the C2. A configured provider list is not proof that every provider was contacted."
+    },
+    {
+      "technique": "LBC-004",
+      "methods": [
+        "evm"
+      ],
+      "collect": "Polling requests, returned command/configuration bytes and module handling code.",
+      "inspect": "Recover command boundaries, encryption and task selection from the sample; compare responses at incident-time blocks.",
+      "correlate": "Link an identified task to process, file or command-result evidence. Preserve unexecuted tasks separately.",
+      "limits": "Configuration reads do not prove all modules or commands ran. Do not reclassify a URL-only resolver as a command channel."
+    },
+    {
+      "technique": "LBC-005",
+      "methods": [
+        "bitcoin"
+      ],
+      "collect": "Reference address, transaction history, raw transactions and sample OP_RETURN decoder.",
+      "inspect": "Select the transaction/output exactly as the sample does; extract pushed bytes and reproduce the evidenced decryption.",
+      "correlate": "Correlate the recovered backup domain with a later DNS/proxy/C2 event and the fallback trigger.",
+      "limits": "A public reference address may not be attacker-owned. OP_RETURN transactions cannot enumerate readers or infected hosts."
+    },
+    {
+      "technique": "LBC-006",
+      "methods": [
+        "bitcoin"
+      ],
+      "collect": "Candidate transaction outputs, integer satoshi values and the amount-to-address logic.",
+      "inspect": "Apply the documented output selection, numeric conversion and byte order; retain a reproducible calculation.",
+      "correlate": "Compare the proposed IP with destination connections and recovery timing from the host.",
+      "limits": "Do not decode arbitrary payments into IPs or use floating-point amounts. A plausible address alone is weak evidence."
+    },
+    {
+      "technique": "LBC-007",
+      "methods": [
+        "evm"
+      ],
+      "collect": "Wallet/block scan, selected transfer, sender/recipient bytes and loader selection code.",
+      "inspect": "Determine whether the sample scans blocks or outbound zero-value transfers; decode only the selected recipient bytes.",
+      "correlate": "Match the reconstructed destination to a contacted server and the sample\u2019s other recovery routes.",
+      "limits": "This need not involve a contract. Wallet activity is signaling evidence, not an infection count or automatic ownership proof."
+    },
+    {
+      "technique": "LBC-008",
+      "methods": [
+        "cross-chain",
+        "evm"
+      ],
+      "collect": "TRON/Aptos lookup responses, fallback order and the BSC transaction pointer returned by each route.",
+      "inspect": "Preserve each hop as a separate chain/network/object; retrieve the BSC input and follow the evidenced decryption.",
+      "correlate": "Build the observed route and identify which fallback branch actually executed before the off-chain stage.",
+      "limits": "Use chain-native parsing for TRON and Aptos; EVM RPC examples apply only to the BSC stage. Do not infer transfers or bridges between chains."
+    },
+    {
+      "technique": "LBC-009",
+      "methods": [
+        "evm"
+      ],
+      "collect": "Visitor UUID/cookie, contract request, any transaction and the schema of telemetry fields.",
+      "inspect": "Identify whether the code checks a flag or writes IP/visitor data. Preserve field-level decoded evidence and transaction status.",
+      "correlate": "Link a specific visitor check/write to browser-session timestamps without exposing unnecessary personal data in the report.",
+      "limits": "A getter check is not a write. UUID de-duplication is not automatically IP or file exfiltration; raw counts are not unique victims."
+    },
+    {
+      "technique": "LBC-010",
+      "methods": [
+        "services"
+      ],
+      "collect": "Original .bit name, resolver configuration, chain record and observed DNS/HTTP resolution path.",
+      "inspect": "Capture the available record/history and expiration context; separate Namecoin data from gateway/resolver responses.",
+      "correlate": "Compare the incident-time answer with the actual download/C2 destination from the host.",
+      "limits": "Current records can differ from historical answers. Ordinary gateway DNS infrastructure is not the blockchain name itself."
+    },
+    {
+      "technique": "LBC-011",
+      "methods": [
+        "services"
+      ],
+      "collect": "Emercoin namespace/name, name-value data, gateway and incident-time resolution.",
+      "inspect": "Inspect complete name_show/name_history results where available; preserve TTL/expiration and field interpretation.",
+      "correlate": "Connect the resolved destination to the browser/process that used the name.",
+      "limits": "Do not treat all names in a namespace as malicious or infer owner identity from a shared gateway."
+    },
+    {
+      "technique": "LBC-012",
+      "methods": [
+        "content"
+      ],
+      "collect": "CID, optional path, gateway form, HTTP response and payload/page bytes.",
+      "inspect": "Parse path/subdomain addressing; preserve the CID and inert bytes plus file hash without rendering the page.",
+      "correlate": "Match the artifact to download, execution or credential-collection telemetry and any subsequent destination.",
+      "limits": "Gateway ownership is not uploader attribution. Content hosting does not establish that credentials or files were exfiltrated over IPFS."
+    },
+    {
+      "technique": "LBC-013",
+      "methods": [
+        "content"
+      ],
+      "collect": "IPFS peer/client configuration, process sockets and available application messages.",
+      "inspect": "Determine whether the sample uses native peer messaging, content retrieval or both; preserve peer IDs and session context.",
+      "correlate": "Relate peer traffic to host commands or results using application/endpoint evidence.",
+      "limits": "HTTP gateway inventory does not cover native peer traffic. A peer connection alone does not reveal message contents or attacker control."
+    },
+    {
+      "technique": "LBC-014",
+      "methods": [
+        "content"
+      ],
+      "collect": "Research algorithm, identifier-generation inputs, time/seed parameters and a preserved demonstration trace.",
+      "inspect": "Reproduce candidate identifiers offline from the supplied algorithm and recorded inputs; compare with the trace.",
+      "correlate": "Explain which generated identifiers were actually requested and what the demonstration returned.",
+      "limits": "Keep this as research unless independent operational evidence exists. Do not probe generated identifiers on public networks by default."
+    },
+    {
+      "technique": "LBC-015",
+      "methods": [
+        "overlays"
+      ],
+      "collect": "NKN client identity, seed discovery, selected relay and malware message-handling code.",
+      "inspect": "Separate discovery, relay sessions and NKN messaging from wallet transactions; preserve encrypted message envelopes if available.",
+      "correlate": "Link incoming messages to commands and host behavior; keep MQTT or other parallel channels distinct.",
+      "limits": "A relay is not automatically attacker-owned. Ledger history cannot reconstruct off-chain NKN message contents."
+    },
+    {
+      "technique": "LBC-016",
+      "methods": [
+        "overlays"
+      ],
+      "collect": "NKN send events, client/recipient identity and locally collected screenshots, output or system information.",
+      "inspect": "Map serialized message fields to local artifacts; keep encryption/key provenance and message direction.",
+      "correlate": "Correlate a specific send with data collection, process context and connection timing/volume.",
+      "limits": "Code capable of sending data is not proof of a completed transfer. Do not claim public-chain storage of overlay messages."
+    },
+    {
+      "technique": "LBC-017",
+      "methods": [
+        "overlays"
+      ],
+      "collect": "Android/app artifacts, .adnl destination, local TON proxy configuration and session telemetry.",
+      "inspect": "Trace the app-to-local-proxy-to-overlay route; keep pseudo-hostnames and native peer identifiers intact.",
+      "correlate": "Match remote-control or upload activity to screen/file/network evidence from the device.",
+      "limits": "Do not put .adnl identifiers in ordinary DNS hostname blocklists. This is distinct from TON smart-contract resolution."
+    },
+    {
+      "technique": "LBC-018",
+      "methods": [
+        "services"
+      ],
+      "collect": "Canister principal/hostname, polling request, returned URL and loader artifact.",
+      "inspect": "Inspect the exact canister response and method; preserve query/update/HTTP distinctions and certification context.",
+      "correlate": "Find the subsequent fetch in host telemetry and preserve the downloaded artifact hash.",
+      "limits": "A shared parent domain is broader than the canister hostname. Query readers are not enumerable as ordinary ledger transactions."
+    },
+    {
+      "technique": "LBC-019",
+      "methods": [
+        "evm"
+      ],
+      "collect": "Polygon getter request, returned messaging-proxy address and fallback RPC configuration.",
+      "inspect": "Reproduce the pointer read and any decode at the incident block; retain state changes over the relevant window.",
+      "correlate": "Connect the resolved proxy to captured victim\u2013operator communication metadata.",
+      "limits": "The message relay is off-chain. A pointer does not show message contents, and configured RPCs do not prove use."
+    },
+    {
+      "technique": "LBC-020",
+      "methods": [
+        "bitcoin"
+      ],
+      "collect": "Research protocol, Bitcoin testnet trace, encoded transaction material and evaluation parameters.",
+      "inspect": "Apply the paper\u2019s channel-specific extraction to the supplied trace and preserve each transformation.",
+      "correlate": "Distinguish protocol feasibility from a real host sending sensitive data; report the experiment\u2019s actual scope.",
+      "limits": "A covert-channel demonstration is not measured malware prevalence or proof of operational exfiltration."
+    },
+    {
+      "technique": "LBC-021",
+      "methods": [
+        "evm",
+        "content"
+      ],
+      "collect": "Research contract/workflow, Ethereum transactions, IPFS identifiers and the demonstration\u2019s actor roles.",
+      "inspect": "Map coordination state and content references separately using EVM and content procedures.",
+      "correlate": "Reconstruct only the demonstrated coordination path and any supplied execution evidence.",
+      "limits": "Do not describe the research architecture as an attributed ransomware group or assume its IPFS objects store victim data."
+    },
+    {
+      "technique": "LBC-022",
+      "methods": [
+        "solana"
+      ],
+      "collect": "Wallet, cluster, getSignaturesForAddress/getTransaction responses and loader memo-selection rule.",
+      "inspect": "Page history to the incident window, inspect transaction status/instructions and decode the selected memo.",
+      "correlate": "Match the next-stage URL/content to the loader\u2019s request and later execution or collection events.",
+      "limits": "Address references need not be signatures by that address. A configured fallback route is not a confirmed session."
+    },
+    {
+      "technique": "LBC-023",
+      "methods": [
+        "content"
+      ],
+      "collect": "Stable IPNS name, fallback trigger, time-stamped resolution and resulting CID/path.",
+      "inspect": "Preserve the IPNS record where available, verification status and the exact target fetched at that time.",
+      "correlate": "Correlate the failed original connection, IPNS recovery and new downstream request.",
+      "limits": "IPNS names are mutable names, not CIDs. A present-day resolution cannot establish an old C2 target."
+    },
+    {
+      "technique": "LBC-024",
+      "methods": [
+        "content"
+      ],
+      "collect": "Arweave query/tags, selection logic, returned transaction/data-item ID and encrypted configuration.",
+      "inspect": "Recover the selected data from preserved responses; apply the sample\u2019s keys and decode sequence.",
+      "correlate": "Establish whether the Arweave branch ran and connect the recovered transport settings to host activity.",
+      "limits": "The cited intrusion did not confirm runtime use. Code connected to a sample is not proof of execution in that incident."
+    },
+    {
+      "technique": "LBC-025",
+      "methods": [
+        "services"
+      ],
+      "collect": "Research NFT contract, token ID, state/metadata/event source and demonstration trace.",
+      "inspect": "Identify the field used as the command channel and retrieve its incident/demo-time value or saved response.",
+      "correlate": "Link a decoded command/result to the supplied demonstration, keeping token ownership and infrastructure control separate.",
+      "limits": "The metadata interface is optional. The catalog entry is research, not an operational campaign attribution."
+    },
+    {
+      "technique": "LBC-026",
+      "methods": [
+        "evm"
+      ],
+      "collect": "First-stage request, subsequent contract/selectors and captured platform detection/branch logic.",
+      "inspect": "Record each return value and contract hop on its actual network; preserve which platform branch was chosen.",
+      "correlate": "Connect the selected platform payload with browser/OS evidence and subsequent execution artifacts.",
+      "limits": "Several contracts on one network are not automatically cross-chain routing. Unselected platform branches remain code capabilities."
+    },
+    {
+      "technique": "LBC-027",
+      "methods": [
+        "evm"
+      ],
+      "collect": "Page/loader, chain-returned lure code, displayed instruction and browser-to-shell evidence.",
+      "inspect": "Decode the chain stage as inert text and separate it from the user instruction and shell command.",
+      "correlate": "Correlate copy/paste or execution artifacts with the subsequent payload; record gaps if only the lure was seen.",
+      "limits": "A blockchain request alone does not prove ClickFix execution. General ClickFix detections are not blockchain-specific evidence."
+    },
+    {
+      "technique": "LBC-028",
+      "methods": [
+        "evm"
+      ],
+      "collect": "Injected browser script, resolver/hosting contract response, skimmer code and transfer telemetry.",
+      "inspect": "Recover the destination and distinguish plaintext/encrypted variants; identify enabled collection and transmission paths.",
+      "correlate": "Match card-field access to actual HTTP/WebSocket sends when captured; separate contacted hosts from staged hosts.",
+      "limits": "Contract routing does not mean card data is stored on-chain. Alternative code paths are not confirmed transfers."
+    },
+    {
+      "technique": "LBC-029",
+      "methods": [
+        "evm"
+      ],
+      "collect": "Encrypted contract value, compromised-site password/key material and the decoding routine.",
+      "inspect": "Preserve both halves and provenance; reproduce decryption offline with input/output hashes.",
+      "correlate": "Link the recovered destination only to the individually evidenced encrypted loader and its network behavior.",
+      "limits": "A contract alone may be insufficient. Do not attach the whole plaintext tracker or infer encrypted transport from encrypted storage."
+    },
+    {
+      "technique": "LBC-030",
+      "methods": [
+        "overlays"
+      ],
+      "collect": "TON API get-method request, account if available, returned stack and incident network/block context.",
+      "inspect": "Decode the getter result using the sample\u2019s method and cell/stack interpretation; compare saved historical values.",
+      "correlate": "Connect the resolved domain to a captured follow-on session from the affected host.",
+      "limits": "The cited report redacts the account. Mark it unavailable; do not invent an explorer link or substitute a TON overlay destination."
+    },
+    {
+      "technique": "LBC-031",
+      "methods": [
+        "evm"
+      ],
+      "collect": "WordPress files/persistence locations, RPC request/selectors and off-chain POST artifacts.",
+      "inspect": "Reconstruct the server-side loader path and decode captured responses; keep site/session collection logic separate.",
+      "correlate": "Correlate web-server execution and POSTs with the resolved endpoint and persisted loader locations.",
+      "limits": "The report omits full contract/network details and exact RPC hosts. Missing values stay unknown; a selector is not a complete contract IOC."
+    },
+    {
+      "technique": "LBC-032",
+      "methods": [
+        "evm",
+        "content"
+      ],
+      "collect": "Multi-channel loader configuration, IPFS stage, Ethereum branch and module enable/disable state.",
+      "inspect": "Map fallback conditions and determine which route ran from captured requests; inspect IPFS and EVM evidence separately.",
+      "correlate": "Tie enabled behavior to payload and process artifacts; mark disabled collection/propagation features as code-only.",
+      "limits": "Ethereum configuration is not a confirmed command exchange. Do not report disabled exfiltration modules as observed data loss."
+    },
+    {
+      "technique": "LBC-033",
+      "methods": [
+        "evm"
+      ],
+      "collect": "BSC-testnet getter response, staged JavaScript, SDP/ICE/DTLS parameters and browser session evidence.",
+      "inspect": "Decode the returned script offline; preserve hardcoded signaling material and any CSP nonce/Function branch.",
+      "correlate": "Match ICE negotiation and a selected WebRTC data channel to buffered payload bytes and later DOM/execution artifacts.",
+      "limits": "SDP in chain data is signaling, not the payload transport itself. A failed negotiation does not prove delivery or on-chain exfiltration."
+    }
+  ]
+}

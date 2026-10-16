@@ -1,0 +1,4 @@
+interface:
+  display_name: "LOLCHAIN Analysis"
+  short_description: "Investigate blockchain-assisted malware and C2"
+  default_prompt: "Use $lolchain-analysis to investigate these artifacts and produce an evidence-linked blockchain analysis."

@@ -1,0 +1,14 @@
+# LOLCHAIN
+
+> Source-backed defensive reference for blockchain-assisted malware techniques.
+
+## Investigation
+- [Analyst Guide](analyst-guide.md): methods and 33 technique playbooks.
+- [AI skill](skill/lolchain-analysis/SKILL.md): entry point; load linked references as needed.
+- [Complete skill package](downloads/lolchain-analysis.zip): offline references.
+
+## Evidence
+- [Catalog dataset](data.json): techniques, sources, chain objects and endpoint provenance.
+- [Guide data](analyst-guide.json): analyst procedures and protocol references.
+
+Shared providers and community RPC entries are not malicious by membership. Preserve evidence labels and source limitations.

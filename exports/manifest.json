@@ -1,0 +1,23 @@
+{
+  "all": {
+    "record_count": 7834,
+    "host_count": 6051,
+    "txt": "exports/all/hosts.txt",
+    "json": "exports/all/endpoints.json",
+    "csv": "exports/all-endpoints.csv"
+  },
+  "endpoints": {
+    "record_count": 316,
+    "host_count": 297,
+    "txt": "exports/endpoints/hosts.txt",
+    "json": "exports/endpoints/endpoints.json",
+    "csv": "exports/endpoints/endpoints.csv"
+  },
+  "directory": {
+    "record_count": 7518,
+    "host_count": 5797,
+    "txt": "exports/directory/hosts.txt",
+    "json": "exports/directory/endpoints.json",
+    "csv": "exports/directory/endpoints.csv"
+  }
+}
